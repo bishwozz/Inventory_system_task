@@ -1,6 +1,6 @@
 from celery import shared_task
 from app.models import Product
-from app.database import SessionLocal
+from app.db.database import SessionLocal
 from datetime import datetime, timedelta
 import logging
 
@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 # Mock Notification Function
 def send_notification(message: str):
     logger.info(f"Sending notification: {message}")
-    # Here, you can integrate actual notification systems like email or SMS.
     return message
 
 @shared_task

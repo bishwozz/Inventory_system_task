@@ -1,34 +1,42 @@
-# app/schemas/user.py
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel
+from app.models import User
+from typing import List
 
-# Role schema
-class RoleBase(BaseModel):
-    name: str
+class UserCreate(BaseModel):
+    email: str
+    username: str
+    password: str
 
-class RoleOut(RoleBase):
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+    class Config:
+        orm_mode = True
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class UserResponse(BaseModel):
+    username: str
+    email: str
     id: int
 
     class Config:
         orm_mode = True
+        from_attributes = True 
 
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    role_id: Optional[int] = None  # Role is optional during registration
+
+# Convert User object to UserResponse schema
+def user_to_response(user: User):
+    return UserResponse.from_orm(user)
+
 
 class UserOut(BaseModel):
     id: int
     username: str
-    email: EmailStr
+    email: str
     role_id: int
-    is_active: bool
 
     class Config:
         orm_mode = True
-
-# For login
-class LoginForm(BaseModel):
-    email: str
-    password: str

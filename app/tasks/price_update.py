@@ -1,33 +1,18 @@
-from celery import shared_task
-from app.database.database import SessionLocal
-from app.models import Product
-from datetime import datetime, timedelta
-import math
+# app/tasks.py
+from celery import Celery
+from app.db.database import SessionLocal
+from app.models.product import Product
+from app.utils.price_adjustment import apply_price_adjustment
 
-# Price adjustment thresholds
-LOW_STOCK_THRESHOLD = 10  # Threshold for low stock
-EXPIRATION_THRESHOLD_DAYS = 7  # Days before expiration to apply price reduction
+celery_app = Celery('tasks', broker='redis://localhost:6379/0')
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def update_product_prices(self):
+@celery_app.task
+def adjust_prices_periodically():
     db = SessionLocal()
-    try:
-        # Get products with low stock or close to expiration
-        products_to_update = db.query(Product).filter(
-            (Product.stock <= LOW_STOCK_THRESHOLD) |
-            (Product.expiry_date <= datetime.now() + timedelta(days=EXPIRATION_THRESHOLD_DAYS))
-        ).all()
+    products = db.query(Product).all()
 
-        for product in products_to_update:
-            # Update price based on stock or expiration
-            if product.stock <= LOW_STOCK_THRESHOLD:
-                product.price = product.price * 1.2  # Increase price by 20% for low stock
-            elif product.expiry_date <= datetime.now() + timedelta(days=EXPIRATION_THRESHOLD_DAYS):
-                product.price = product.price * 0.8  # Decrease price by 20% for products close to expiration
-
-            db.commit()
-    except Exception as e:
-        db.rollback()
-        raise self.retry(exc=e)  # Retry in case of failure
-    finally:
-        db.close()
+    for product in products:
+        product = apply_price_adjustment(product)
+        db.commit()
+        db.refresh(product)
+    db.close()

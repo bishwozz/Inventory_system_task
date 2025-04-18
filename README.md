@@ -1,132 +1,161 @@
-## Project Structure Overview
+# Inventory System Documentation
 
-inventory_system_task/
-├── app/
-│   ├── config/
-│   │   └── settings.py        # Pydantic settings & env var loader
-│   ├── controllers/
-│   │   ├── auth.py            # login, JWT token endpoint
-│   │   ├── users.py           # user CRUD (RBAC)
-│   │   ├── products.py        # product endpoints
-│   │   ├── inventory.py       # stock add/remove & queries
-│   │   └── alerts.py          # low-stock & expiry alerts
-│   ├── database/
-│   │   ├── base.py            # declarative Base import
-│   │   ├── session.py         # AsyncSession maker
-│   │   └── migrations/        # Alembic migration scripts
-│   ├── models/
-│   │   ├── user.py            # User table
-│   │   ├── product.py         # Product table
-│   │   ├── inventory_entry.py # InventoryEntry table
-│   │   ├── pricing_rule.py    # PricingRule table
-│   │   └── alert.py           # Alert table
-│   ├── schemas/
-│   │   ├── user.py            # Pydantic models for User
-│   │   ├── product.py         # schemas for Product
-│   │   ├── inventory.py       # schemas for InventoryEntry
-│   │   └── alert.py           # schemas for Alert
-│   ├── tasks/
-│   │   └── celery.py          # Celery app & periodic task setup
-│   ├── utils/
-│   │   ├── cache.py           # Redis caching helpers
-│   │   └── rate_limit.py      # rate‑limiting decorators
-│   └── main.py                # FastAPI app instantiation, router includes
-├── Dockerfile                 # Build Python/FastAPI container
-├── requirements.txt           # Pinned dependencies
-├── docker-compose.yml         # Orchestrate services (Postgres, Redis, app, Celery)
-└── README.md                  # Setup & usage documentation
+## Setup Instructions (Docker)
 
-### 🧪 Lightweight Inventory System (FastAPI + PostgreSQL + Redis + Celery)
+To get the project up and running with Docker, follow these steps:
 
-A lightweight inventory system with support for expiration tracking, dynamic pricing, low stock alerts, and rate-limited endpoints.
+1. **Clone the repository:**
+
+   ```bash
+   git clone <repository_url>
+   cd <repository_folder>
+   ```
+
+2. **Build and run the Docker containers:**
+   Ensure Docker is installed on your machine. Then, run the following command to build and start the containers:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the app:**
+   Once the containers are up, you can access the FastAPI app via [http://localhost:8000](http://localhost:8000).
+
+4. **Access the Swagger API docs:**
+   FastAPI automatically generates API documentation using Swagger. Access it by going to:
+
+   ```bash
+   http://localhost:8000/docs
+   ```
+
+5. **Database setup (Optional for first run):**
+   The Docker Compose setup will automatically create and migrate the database. However, if you want to manually create the database schema, you can use the following command:
+   ```bash
+   docker-compose exec app python -c 'from app.db.base import Base, engine; Base.metadata.create_all(bind=engine)'
+   ```
 
 ---
 
-## 📦 Tech Stack
+## Sample API Usage
 
-- FastAPI 🚀
-- PostgreSQL 🐘
-- Redis ⚡
-- Celery 🎯
-- Docker 🐳
+Here are some sample API requests to interact with your inventory system:
 
----
+### 1. **User Registration**
 
-## ⚙️ Setup Instructions
+**POST** `/api/v1/register`
 
-### 1. Clone the repo
+Example Request Body:
 
-```bash
-git clone <your-repo-url>
-cd inventory-system
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "role": "user"
+}
 ```
 
-## 2. Create .env file
+### 2. **User Login**
 
-env
-Copy
-Edit
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/inventory_db
-REDIS_URL=redis://redis:6379
+**POST** `/api/v1/login`
 
-## 3. Run using Docker Compose
+Example Request Body:
 
-bash
-Copy
-Edit
-docker-compose build
-docker-compose up -d
-
-## 🛠 Sample Endpoints
-
-✅ Add Inventory
-http
-Copy
-Edit
-POST /api/v1/inventory/
-Body:
-
-json
-Copy
-Edit
+```json
 {
-"product_id": 1,
-"quantity": 5,
-"expiration_date": "2025-05-01T00:00:00"
+  "email": "user@example.com",
+  "password": "password123"
 }
+```
 
-## 🔄 Trigger Celery Task (Manual)
+**Response**:
 
-bash
-Copy
-Edit
-docker exec -it celery_worker celery -A app.worker.celery_app call app.tasks.inventory_tasks.
+```json
+{
+  "access_token": "jwt_token_here",
+  "token_type": "bearer"
+}
+```
 
-## 🔁 Pricing Rule Logic
+---
 
-If inventory is expiring in ≤3 days → 20% price discount
+### 3. **Create Product (Admin only)**
 
-Products with total quantity < 5 → trigger alert
+**POST** `/api/v1/products/`
 
-## 🧱 System Overview
+Example Request Body:
 
-                     ┌────────────┐
-                     │   Client   │
-                     └─────┬──────┘
-                           │
-                    ┌──────▼──────┐
-                    │  FastAPI    │
-                    └──────┬──────┘
-                           │
-          ┌────────┬───────┼─────────────┐
-          │        │       │             │
-          ▼        ▼       ▼             ▼
-      PostgreSQL  Redis   Celery       Docker
-    (Inventory DB) (Cache) (Worker) (Infra)
+```json
+{
+  "name": "Product A",
+  "description": "A test product",
+  "price": 100.0,
+  "expiration_date": "2025-12-31T00:00:00"
+}
+```
 
+---
 
+### 4. **Get Product by ID**
 
+**GET** `/api/v1/products/{product_id}`
 
-seeder
+---
 
-docker compose exec web python3 -m app.seed.seed_users
+### 5. **Update Product (Admin only)**
+
+**PUT** `/api/v1/products/{product_id}/`
+
+Example Request Body:
+
+```json
+{
+  "price": 120.0
+}
+```
+
+---
+
+### 6. **Delete Product (Admin only)**
+
+**DELETE** `/api/v1/products/{product_id}`
+
+---
+
+### 7. **List Products (With Pagination)**
+
+**GET** `/api/v1/products/`
+
+Example Query Parameters:
+
+```bash
+/products?expiring_in=7&page=1&limit=10
+```
+
+---
+
+## System Overview Diagram
+
+Here’s a simple diagram to represent the overall system architecture:
+
+```
++------------------+      +------------------+      +------------------+
+|  FastAPI (App)   | <---> |   PostgreSQL     | <---> |    Redis Cache   |
++------------------+      +------------------+      +------------------+
+        |                        |                         |
+   +-------------+         +-------------+          +------------------+
+   | Celery Worker|         | Celery Beat |          |  API Requests   |
+   +-------------+         +-------------+          +------------------+
+```
+
+---
+
+## Description of Pricing Rule Logic
+
+The pricing rule is applied based on the expiration proximity of the product. For example:
+
+- If a product is nearing its expiration date (within the next 15 days), the price is adjusted by a set percentage (e.g., 10% off).
+- This helps clear out near-expiry items by making them more attractive to customers.
+
+### Example:
+
+If a product has an original price of $100 and is set to expire in 10 days, applying a 10% discount would result in a new price of $90.

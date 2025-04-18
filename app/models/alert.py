@@ -1,14 +1,16 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
+from app.db.base import Base
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from app.models.base import Base
 
 class Alert(Base):
     __tablename__ = "alerts"
-
+    
     id = Column(Integer, primary_key=True, index=True)
-    product_id = Column(Integer, ForeignKey("products.id"))
+    product_id = Column(Integer, index=True)
+    alert_type = Column(String, index=True)  # e.g., "expiration", "low-stock"
+    threshold_days = Column(Integer, nullable=True)  # For expiration alert
+    threshold_stock = Column(Integer, nullable=True)  # For stock alert
     message = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
+    product_id = Column(Integer, ForeignKey("products.id"), index=True)
     product = relationship("Product", back_populates="alerts")

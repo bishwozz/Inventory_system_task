@@ -1,39 +1,59 @@
 from celery import Celery
-import os
-from dotenv import load_dotenv
+from datetime import datetime, timedelta
+from app.db.database import SessionLocal
+from app.models.product import Product
 from celery.schedules import crontab
 
-# Load environment variables
-load_dotenv()
+# Initialize Celery
+celery_app = Celery(
+    "inventory_system",
+    broker="redis://localhost:6379/0",  # Redis as the message broker
+    backend="redis://localhost:6379/0",  # Redis for storing results
+)
 
-# Celery app configuration
-app = Celery('worker', broker=os.getenv('CELERY_BROKER_URL'), backend=os.getenv('CELERY_RESULT_BACKEND'))
+# Task to scan inventory and apply pricing rules
+@celery_app.task
+def scan_inventory():
+    db = SessionLocal()
+    products = db.query(Product).all()
+    for product in products:
+        # Apply price adjustment for products nearing expiration (7 days)
+        if product.expiration_date <= datetime.utcnow() + timedelta(days=7):
+            product.price = product.price * 0.9  # 10% discount for near-expiry items
+    db.commit()
+    db.close()
+    return {"message": "Inventory scanned and price adjustments applied"}
 
-# Automatically discover tasks in the tasks module
-app.conf.imports = ('app.tasks.celery_notifications',)
+# Task to trigger low-stock alerts
+@celery_app.task
+def trigger_low_stock_alert():
+    db = SessionLocal()
+    low_stock_products = db.query(Product).filter(Product.stock <= 5).all()
+    # You can replace this with a real alert system (e.g., email, push notifications)
+    for product in low_stock_products:
+        print(f"Low stock alert: Product {product.name}, Stock: {product.stock}")
+    db.close()
+    return {"message": "Low stock alerts triggered"}
 
-# Celery worker starts with:
-# celery -A celery_worker.app worker --loglevel=info
-
-# Schedule tasks to run periodically (every day)
-from celery import Celery
-from celery.schedules import crontab
-
-app = Celery('worker', broker='redis://redis_cache:6379/0')
-
-# Define periodic task schedule
-app.conf.beat_schedule = {
-    'check-low-stock-products': {
-        'task': 'app.tasks.low_stock_alert.check_low_stock_products',
-        'schedule': crontab(minute=0, hour=0),  # Run once a day at midnight
+# Periodic task schedule configuration
+celery_app.conf.beat_schedule = {
+    "scan-inventory-every-hour": {
+        "task": "app.celery_worker.scan_inventory",
+        "schedule": timedelta(hours=1),  # Run every hour
     },
-    'update-product-prices': {
-        'task': 'app.tasks.update_product_prices',
+    "low-stock-alert-every-hour": {
+        "task": "app.celery_worker.trigger_low_stock_alert",
+        "schedule": timedelta(hours=1),  # Run every hour
+    },
+    'check-low-stock-every-day': {
+        'task': 'app.tasks.low_stock_alert.check_low_stock_alerts',
         'schedule': crontab(minute=0, hour=0),  # Runs every day at midnight
     },
-    'check-expiring-products': {
-        'task': 'app.tasks.expiration_alert.check_expiring_products',
-        'schedule': crontab(minute=0, hour=0),  # Run once a day at midnight
-    },
+    "adjust-dynamic-prices-daily": {
+        "task": "app.tasks.dynamic_pricing.apply_dynamic_pricing",
+        "schedule": crontab(hour=0, minute=0),  # Every midnight
+    }
 }
 
+celery_app.conf.timezone = "UTC"
+celery_app.autodiscover_tasks(['app.tasks'])
