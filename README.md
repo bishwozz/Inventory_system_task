@@ -1,25 +1,40 @@
 ## Project Structure Overview
 
-inventory_system_task/ # Root folder of the project
-├── app/ # Your actual FastAPI application code lives here
-│ ├── api/ # All your API route definitions (like /users, /products)
-│ │ └── v1/ # Versioned API
-│ │ └── endpoints/
-│ ├── core/ # Core configs like settings, JWT, and security logic
-│ ├── crud/ # CRUD operations that talk to the DB
-│ ├── db/ # DB models and DB session setup
-│ ├── schemas/ # Pydantic schemas for request/response validation
-│ ├── services/ # Business logic like pricing/alerting
-│ ├── tasks/ # Celery background task functions
-│ ├── cache/ # Redis caching, rate-limiting logic
-│ ├── main.py # Entry point for FastAPI app
-│ └── celery_worker.py # Entry point for Celery
-├── docker-compose.yml # Run all services with one command
-├── Dockerfile # Builds your FastAPI app container
-├── .env # Environment variables (database/redis URLs)
-├── requirements.txt # Python packages needed
-├── README.md # Project documentation
-└── seed/ # Initial SQL data for demo
+inventory_system_task/
+├── app/
+│   ├── config/
+│   │   └── settings.py        # Pydantic settings & env var loader
+│   ├── controllers/
+│   │   ├── auth.py            # login, JWT token endpoint
+│   │   ├── users.py           # user CRUD (RBAC)
+│   │   ├── products.py        # product endpoints
+│   │   ├── inventory.py       # stock add/remove & queries
+│   │   └── alerts.py          # low-stock & expiry alerts
+│   ├── database/
+│   │   ├── base.py            # declarative Base import
+│   │   ├── session.py         # AsyncSession maker
+│   │   └── migrations/        # Alembic migration scripts
+│   ├── models/
+│   │   ├── user.py            # User table
+│   │   ├── product.py         # Product table
+│   │   ├── inventory_entry.py # InventoryEntry table
+│   │   ├── pricing_rule.py    # PricingRule table
+│   │   └── alert.py           # Alert table
+│   ├── schemas/
+│   │   ├── user.py            # Pydantic models for User
+│   │   ├── product.py         # schemas for Product
+│   │   ├── inventory.py       # schemas for InventoryEntry
+│   │   └── alert.py           # schemas for Alert
+│   ├── tasks/
+│   │   └── celery.py          # Celery app & periodic task setup
+│   ├── utils/
+│   │   ├── cache.py           # Redis caching helpers
+│   │   └── rate_limit.py      # rate‑limiting decorators
+│   └── main.py                # FastAPI app instantiation, router includes
+├── Dockerfile                 # Build Python/FastAPI container
+├── requirements.txt           # Pinned dependencies
+├── docker-compose.yml         # Orchestrate services (Postgres, Redis, app, Celery)
+└── README.md                  # Setup & usage documentation
 
 ### 🧪 Lightweight Inventory System (FastAPI + PostgreSQL + Redis + Celery)
 
@@ -108,3 +123,10 @@ Products with total quantity < 5 → trigger alert
           ▼        ▼       ▼             ▼
       PostgreSQL  Redis   Celery       Docker
     (Inventory DB) (Cache) (Worker) (Infra)
+
+
+
+
+seeder
+
+docker compose exec web python3 -m app.seed.seed_users

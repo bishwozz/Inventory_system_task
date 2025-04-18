@@ -1,12 +1,12 @@
+import os
 from celery import Celery
-from app.core.config import settings  # Import settings for Redis URL
+from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
 
-celery_app = Celery(
-    "worker",
-    broker=settings.REDIS_URL,  # Use Redis URL from the environment
-    backend=settings.REDIS_URL
-)
+# Load secret from environment
+REDIS_URL = os.getenv("REDIS_URL")
 
-celery_app.conf.timezone = "UTC"
-celery_app.conf.task_default_retry_delay = 60  # Retry delay in seconds
-celery_app.conf.task_max_retries = 5  # Max retries
+# Create a Celery instance
+celery_app = Celery('inventory_system', broker=REDIS_URL)
+
+celery_app.conf.result_backend = REDIS_URL

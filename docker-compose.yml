@@ -3,63 +3,61 @@ version: "3.9"
 services:
   web:
     build: .
-    container_name: inventory_sys_app
+    container_name: fastapi_app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
+    volumes:
+      - .:/code
     env_file:
       - .env
     depends_on:
       - db
       - redis
-    volumes:
-      - .:/app
+    networks:
+      - backend
 
   db:
     image: postgres:15
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: inventory_sys_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./seed:/docker-entrypoint-initdb.d
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: inventory_pass
+      POSTGRES_DB: inventory_db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - backend
 
   redis:
     image: redis:7
     container_name: redis_cache
     ports:
       - "6379:6379"
-    restart: always
+    networks:
+      - backend
 
-  worker:
+  celery:
     build: .
     container_name: celery_worker
-    command: celery -A app.celery_worker.celery worker --loglevel=info
+    command: celery -A app.worker worker --loglevel=info
     depends_on:
       - web
       - redis
       - db
     volumes:
-      - .:/app
+      - .:/code
     env_file:
       - .env
+    networks:
+      - backend
 
-  celery:
-    build: .
-    command: celery -A app.celery_worker worker --loglevel=info
-    volumes:
-      - .:/code
-    depends_on:
-      - web
-      - redis
-    environment:
-      - REDIS_URL=redis://redis:6379/0
+networks:
+  backend:
+    driver: bridge
 
 volumes:
   postgres_data:
-
-

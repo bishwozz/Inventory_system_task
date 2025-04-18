@@ -1,59 +1,14 @@
-Lightweight Inventory System with ExpirationAwareness
-Overview
-Build a simplified inventory system for goods that supports expiration tracking,
-dynamic pricing, and low-stock alerts. (You can be creative with your solution.
-Use your own data/assumptions when needed)
-Requirements
-1. Core Service (FastAPI)
-Implement a FastAPI backend with endpoints for following task:
-• User management/RBAC
-• CRUD for products with expiration dates
-• Add/remove stock
-• Get inventory by product and expiration range
-• Apply basic price adjustments based on expiration proximity
-• Low stock alert endpoint
-2. Database (PostgreSQL)
-Design schema with(You can add or remove tables):
-• Users
-• Products
-• Inventory entries
-• Pricing rules
-• Alerts
-3. Asynchronous Task Processing (Celery)
-• A scheduled task (periodic or can run on demand) to:
-– Scan inventory
-– Apply pricing rules to adjust prices of near-expiry items
-– Trigger alerts for low-stock items
-4. Caching Layer (Redis)
-• Use Redis to cache product details or inventory counts
-• rate-limit stock adjustment endpoint using Redis
-5. Infrastructure (Docker Compose)
-Provide a docker-compose.yml that runs:
-• FastAPI app
-• PostgreSQL
-• Redis
-• Celery worker
-Include initial schema and dummy seed data.
-6. API Design
-• Clear, versioned endpoints (/api/v1)
-• Support for pagination/filtering (e.g., /products?expiring_in=7)
-• Proper user management and RBAC
-• Proper status codes and error handling
-• Swagger/OpenAPI enabled
-
-7. Documentation
-• README with:
-– Setup instructions (Docker)
-– Sample API usage example(things not covered in swagger)
-– System overview diagram (simple ASCII diagram, .png or online service)
-– Description of pricing rule logic
-
-Evaluation Criteria
-1. API Design & Structure
-2. Database Modeling & Query Logic
-3. Business Logic Implementation
-4. Code Quality & Structure
-5. Caching & Performance Awareness
-6. Asynchronous Processing
-7. Testing & Validation
-8. Documentation & Setup
+fastapi
+uvicorn[standard]
+SQLAlchemy>=2.0
+asyncpg
+alembic
+psycopg2-binary
+python-dotenv
+pydantic
+pydantic-settings
+passlib[bcrypt]
+python-jose
+celery[redis]
+redis
+python-multipart
