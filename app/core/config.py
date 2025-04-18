@@ -1,12 +1,14 @@
 from pydantic import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Inventory System"
-    VERSION: str = "1.0.0"
+
     DATABASE_URL: str
     REDIS_URL: str
+    SECRET_KEY: str
+    ALLOWED_ORIGINS: str
 
     class Config:
         env_file = ".env"
 
+# Instantiate the settings
 settings = Settings()

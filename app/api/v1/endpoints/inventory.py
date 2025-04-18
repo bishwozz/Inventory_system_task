@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import and_
 from app.database.session import get_db
-from app.database.models import InventoryEntry
+from app.models import InventoryEntry
 from app.controller.inventory import InventoryCreate, InventoryOut
 from typing import List
 from datetime import datetime, timedelta
