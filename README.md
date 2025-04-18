@@ -20,3 +20,5 @@ inventory_system_task/          # Root folder of the project
 ├── requirements.txt            # Python packages needed
 ├── README.md                   # Project documentation
 └── seed/                       # Initial SQL data for demo
+
+docker compose exec celery celery -A app.celery_worker call app.tasks.pricing.adjust_expiring_prices

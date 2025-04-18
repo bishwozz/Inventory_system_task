@@ -47,5 +47,18 @@ services:
     env_file:
       - .env
 
+  celery:
+    build: .
+    command: celery -A app.celery_worker worker --loglevel=info
+    volumes:
+      - .:/code
+    depends_on:
+      - web
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+
 volumes:
   postgres_data:
+
+
