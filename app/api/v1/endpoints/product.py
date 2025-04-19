@@ -53,7 +53,7 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
-    set_product_to_cache(db_product)  # optional: cache on create
+    set_product_to_cache(db_product)  # optional
     return success_response(data=db_product, message="Product created successfully")
 
 
@@ -107,11 +107,10 @@ def adjust_product_price(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    # Apply the price adjustment
     product = apply_price_adjustment(product)
     
     db.commit()
     db.refresh(product)
-    set_product_to_cache(product)  # Update the cache after adjustment
+    set_product_to_cache(product)
     
     return {"message": "Price adjusted", "product": product}

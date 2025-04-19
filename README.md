@@ -7,7 +7,7 @@ To get the project up and running with Docker, follow these steps:
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/bishwozz/Inventory_system_task.git
    cd <repository_folder>
    ```
 
@@ -15,7 +15,7 @@ To get the project up and running with Docker, follow these steps:
    Ensure Docker is installed on your machine. Then, run the following command to build and start the containers:
 
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
 
 3. **Access the app:**
@@ -28,10 +28,14 @@ To get the project up and running with Docker, follow these steps:
    http://localhost:8000/docs
    ```
 
-5. **Database setup (Optional for first run):**
-   The Docker Compose setup will automatically create and migrate the database. However, if you want to manually create the database schema, you can use the following command:
+5. **Database setup Manual:**
+   For manually creating the database schema, you can use the following command:
+
    ```bash
-   docker-compose exec app python -c 'from app.db.base import Base, engine; Base.metadata.create_all(bind=engine)'
+      1.docker exec -it <container_name> /bin/bash
+      2.alembic revision --autogenerate -m "your migration message"
+      3.alembic upgrade head
+
    ```
 
 ---
@@ -50,7 +54,7 @@ Example Request Body:
 {
   "email": "user@example.com",
   "password": "password123",
-  "role": "user"
+  "username": "user"
 }
 ```
 
@@ -71,7 +75,14 @@ Example Request Body:
 
 ```json
 {
-  "access_token": "jwt_token_here",
+  "status": "success",
+  "message": "User registered successfully",
+  "data": {
+    "username": "bishwo11",
+    "email": "bishwo11@gmail.com",
+    "id": 15
+  },
+  "access_token": "token",
   "token_type": "bearer"
 }
 ```

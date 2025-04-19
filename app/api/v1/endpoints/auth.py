@@ -15,18 +15,15 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
 # Register User
 @router.post("/register")
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    # Check if the email already exists
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Hash the password
     hashed_password = User.hash_password(user.password)
-
-    # Create the user
     new_user = User(username=user.username, email=user.email, password=hashed_password, role_id=2)
     db.add(new_user)
     db.commit()
@@ -34,12 +31,9 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
     return success_response(data=UserResponse.from_orm(new_user).dict(), message="User registered successfully")
 
-
-
 # Login User
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
-    # Check if the user exists
     user = db.query(User).filter(User.email == request.email).first()
     if not user or not User.verify_password(request.password, user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")

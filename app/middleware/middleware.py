@@ -15,15 +15,11 @@ class CacheMiddleware(BaseHTTPMiddleware):
             db_product = get_product_from_cache(product_id)
             
             if not db_product:
-                # Proceed to the next middleware or endpoint to query the database
                 response = await call_next(request)
-                
-                # After the response is generated, you can cache the result
                 db_product = response.body
                 set_product_to_cache(db_product)
                 return response
             return Response(content=db_product, status_code=200)
-        # Proceed to the next middleware or endpoint
         response = await call_next(request)
         return response
     

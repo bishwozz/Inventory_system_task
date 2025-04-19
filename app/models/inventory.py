@@ -1,4 +1,3 @@
-# app/models/inventory.py
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.db.base import Base
@@ -13,5 +12,4 @@ class InventoryEntry(Base):
     expiration_date = Column(DateTime, nullable=False)
     added_at = Column(DateTime, default=datetime.utcnow)
 
-    # Use string-based reference for the relationship
     product = relationship("Product", back_populates="inventory_entries")

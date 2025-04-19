@@ -27,7 +27,6 @@ class UserResponse(BaseModel):
         from_attributes = True 
 
 
-# Convert User object to UserResponse schema
 def user_to_response(user: User):
     return UserResponse.from_orm(user)
 

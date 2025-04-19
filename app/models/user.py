@@ -1,4 +1,3 @@
-# app/models/user.py
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from app.db.base import Base
@@ -26,6 +25,5 @@ class User(Base):
     def hash_password(password: str) -> str:
         return pwd_context.hash(password)
 
-    # Verify password
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         return pwd_context.verify(plain_password, hashed_password)

@@ -2,7 +2,7 @@ from celery import Celery
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.models.product import Product
-from app.utils.email import send_email_notification  # Assuming you have an email utility
+from app.utils.email import send_email_notification
 from app.cache.redis_cache import get_from_cache, set_to_cache
 
 # Initialize Celery
@@ -53,8 +53,8 @@ def trigger_low_stock_alert():
     """
     This task checks for products with low stock and sends alerts.
     """
-    db = SessionLocal()  # Use your session creation method
-    threshold = 10  # Define the low stock threshold
+    db = SessionLocal() 
+    threshold = 10
     
     # Query for low-stock products
     low_stock_products = db.query(Product).filter(Product.stock < threshold).all()

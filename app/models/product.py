@@ -14,7 +14,6 @@ class Product(Base):
     stock = Column(Integer)
     expiration_date = Column(DateTime)
     
-    # Use string-based references for relationships
     alerts = relationship("Alert", back_populates="product", cascade="all, delete-orphan")
     inventory_entries = relationship("InventoryEntry", back_populates="product", cascade="all, delete-orphan")
     

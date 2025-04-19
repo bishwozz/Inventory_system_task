@@ -1,4 +1,3 @@
-# app/tasks.py
 from celery import Celery
 from app.db.database import SessionLocal
 from app.models.product import Product

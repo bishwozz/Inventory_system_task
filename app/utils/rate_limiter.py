@@ -1,5 +1,3 @@
-# app/utils/rate_limiter.py
-
 import time
 import redis
 from fastapi import HTTPException
@@ -17,7 +15,6 @@ def is_rate_limited(user_id: int, limit: int = 5, period: int = 60):
     if current_count and int(current_count) >= limit:
         raise HTTPException(status_code=429, detail="Rate limit exceeded. Try again later.")
 
-    # Increment the count and set expiry if it's new
     pipe = r.pipeline()
     pipe.incr(key, 1)
     pipe.expire(key, period)

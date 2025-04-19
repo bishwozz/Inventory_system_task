@@ -7,9 +7,9 @@ class Alert(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     product_id = Column(Integer, index=True)
-    alert_type = Column(String, index=True)  # e.g., "expiration", "low-stock"
-    threshold_days = Column(Integer, nullable=True)  # For expiration alert
-    threshold_stock = Column(Integer, nullable=True)  # For stock alert
+    alert_type = Column(String, index=True) 
+    threshold_days = Column(Integer, nullable=True)
+    threshold_stock = Column(Integer, nullable=True) 
     message = Column(String)
 
     product_id = Column(Integer, ForeignKey("products.id"), index=True)

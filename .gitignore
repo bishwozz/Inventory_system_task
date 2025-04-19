@@ -3,3 +3,4 @@
 envvenv/
 .env
 __pycache__/
+venv

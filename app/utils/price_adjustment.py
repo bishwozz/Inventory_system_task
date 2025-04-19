@@ -1,4 +1,3 @@
-# app/utils/price_adjustment.py
 from datetime import timedelta, date
 from app.models.product import Product
 

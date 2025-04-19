@@ -1,5 +1,3 @@
-# app/utils/alert.py
-
 def send_low_stock_alert(product):
     """
     Sends a low stock alert for a product.

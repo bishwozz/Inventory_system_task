@@ -1,7 +1,7 @@
 from app.cache import get_from_cache, set_to_cache
 from app.db.database import SessionLocal
 from app.models.product import Product
-from app.utils.email import send_email_notification  # Assuming you have an email utility
+from app.utils.email import send_email_notification
 
 def check_low_stock_alerts():
     """
@@ -10,13 +10,11 @@ def check_low_stock_alerts():
     """
     cache_key = "low_stock_products"
     
-    # Try to fetch from cache first
     low_stock_products = get_from_cache(cache_key)
     if not low_stock_products:
-        # If not in cache, query the database
         db = SessionLocal()
         low_stock_products = db.query(Product).filter(Product.stock < 10).all()
-        set_to_cache(cache_key, low_stock_products)  # Cache the results
+        set_to_cache(cache_key, low_stock_products)
         db.close()
     
     # Send alerts if any low-stock products exist

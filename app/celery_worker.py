@@ -7,8 +7,8 @@ from celery.schedules import crontab
 # Initialize Celery
 celery_app = Celery(
     "inventory_system",
-    broker="redis://localhost:6379/0",  # Redis as the message broker
-    backend="redis://localhost:6379/0",  # Redis for storing results
+    broker="redis://localhost:6379/0",
+    backend="redis://localhost:6379/0",
 )
 
 # Task to scan inventory and apply pricing rules
@@ -17,9 +17,8 @@ def scan_inventory():
     db = SessionLocal()
     products = db.query(Product).all()
     for product in products:
-        # Apply price adjustment for products nearing expiration (7 days)
         if product.expiration_date <= datetime.utcnow() + timedelta(days=7):
-            product.price = product.price * 0.9  # 10% discount for near-expiry items
+            product.price = product.price * 0.9
     db.commit()
     db.close()
     return {"message": "Inventory scanned and price adjustments applied"}
@@ -29,7 +28,6 @@ def scan_inventory():
 def trigger_low_stock_alert():
     db = SessionLocal()
     low_stock_products = db.query(Product).filter(Product.stock <= 5).all()
-    # You can replace this with a real alert system (e.g., email, push notifications)
     for product in low_stock_products:
         print(f"Low stock alert: Product {product.name}, Stock: {product.stock}")
     db.close()

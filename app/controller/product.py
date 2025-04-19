@@ -24,8 +24,8 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db), curren
     # Create a pricing rule for the product
     pricing_rule = PricingRule(
         product_id=db_product.id,
-        price_change_percentage=10,  # Example value
-        applies_before_expiration=datetime.utcnow() + timedelta(days=15)  # Example expiration date
+        price_change_percentage=10,
+        applies_before_expiration=datetime.utcnow() + timedelta(days=15)
     )
     db.add(pricing_rule)
     db.commit()
@@ -76,7 +76,7 @@ def list_products(
     page: int = Query(1, ge=1, description="Page number (starts from 1)"),
     limit: int = Query(10, le=100, description="Number of products per page (max 100)"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)  # Ensure the user is authenticated
+    current_user: User = Depends(get_current_user) 
 ):
     # Calculate offset for pagination
     skip = (page - 1) * limit
@@ -86,14 +86,12 @@ def list_products(
         threshold = datetime.utcnow() + timedelta(days=expiring_in)
         query = query.filter(Product.expiration_date <= threshold)
 
-    # Get total number of products for pagination
     total_products = query.count()
 
-    # Apply pagination
     products = query.offset(skip).limit(limit).all()
 
     # Calculate the total number of pages
-    total_pages = (total_products + limit - 1) // limit  # Round up to ensure total pages
+    total_pages = (total_products + limit - 1) // limit 
 
     return success_response(
         data=products,

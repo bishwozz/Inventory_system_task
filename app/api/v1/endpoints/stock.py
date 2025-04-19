@@ -28,7 +28,7 @@ def add_stock(product_id: int, stock: int, db: Session = Depends(get_db),current
     db.refresh(db_product)
 
     # Check if stock is below threshold for alert
-    if db_product.stock <= 10:  # Example threshold
+    if db_product.stock <= 10:
         alert = Alert(
             product_id=db_product.id,
             alert_type="Low Stock",
@@ -58,7 +58,7 @@ def remove_stock(product_id: int, stock: int, db: Session = Depends(get_db), cur
     db.refresh(db_product)
 
     # Check if stock is below threshold for alert
-    if db_product.stock <= 10:  # Example threshold
+    if db_product.stock <= 10:
         alert = Alert(
             product_id=db_product.id,
             alert_type="Low Stock",
