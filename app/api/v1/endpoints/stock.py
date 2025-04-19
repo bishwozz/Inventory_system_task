@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.db.database import SessionLocal, get_db, get_product_from_cache, set_product_to_cache
+from app.db.database import SessionLocal, get_db
 from app.models.product import Product
 from app.services.auth import get_current_user
 from app.utils.rate_limiter import is_rate_limited

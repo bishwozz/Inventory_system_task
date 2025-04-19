@@ -1,4 +1,4 @@
-from app.cache import get_from_cache, set_to_cache
+from app.cache.redis_cache import get_from_cache, set_to_cache
 from app.db.database import SessionLocal
 from app.models.product import Product
 from app.utils.email import send_email_notification
