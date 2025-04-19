@@ -9,6 +9,9 @@ class ProductBase(BaseModel):
     price: float
     expiration_date: datetime
     stock: int
+    class Config:
+        orm_mode = True
+        from_attributes = True
 
 class ProductCreate(ProductBase):
     pass

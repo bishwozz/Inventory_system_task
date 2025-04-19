@@ -53,7 +53,7 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
-    set_product_to_cache(db_product)  # optional
+    set_product_to_cache(db_product)
     return success_response(data=db_product, message="Product created successfully")
 
 
