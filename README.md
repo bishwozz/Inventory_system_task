@@ -11,6 +11,8 @@ To get the project up and running with Docker, follow these steps:
    cd <repository_folder>
    ```
 
+- ### copy env.example to .env
+
 2. **Build and run the Docker containers:**
    Ensure Docker is installed on your machine. Then, run the following command to build and start the containers:
 
